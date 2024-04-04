@@ -1,0 +1,66 @@
+name: Scraping Script LLM
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    if: ${{ !github.event.pull_request.draft }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run LLM Scraping Script dfs
+        run: |
+          python links_scraper_dfs.py
+
+      - name: Upload dfs link scraper log artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dfs link scraper logs
+          path: link_scraper_dfs.log
+
+      - name: Run Scraping Script
+        run: |
+          python scraping_script.py
+
+      - name: Upload Scraping Logs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraping_logs
+          path: scraping_logs_*.log 
+      
+      - name: Run preprocessed_data Script
+        run: |
+          python preprocessed_data.py    
+
+      - name: Upload Cleaned data artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleaned data
+          path: cleaned_data.json

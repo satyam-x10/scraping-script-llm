@@ -1,0 +1,10 @@
+/node_modules
+*.log
+*.csv
+*scraped_content*
+*scraped_data*
+*web_crawler*
+*.json*
+!package-lock.json
+!package.json
+*.xlsx*
